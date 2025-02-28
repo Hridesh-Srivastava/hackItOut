@@ -4,20 +4,26 @@
   "description": "",
   "main": "index.js",
   "workspaces": [
-    "frontend",
-    "backend"
+    "Frontend",
+    "Backend"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:frontend": "cd Frontend && npm run dev",
+    "dev:backend": "cd Backend && npm run dev",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "build": "concurrently \"npm run build:frontend\" \"npm run build:backend\"",
-    "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm run build",
-    "start": "cd backend && npm start"
+    "build:frontend": "cd Frontend && npm run build",
+    "build:backend": "cd Backend && npm run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start": "cd Backend && npm run start"
   },
-  "keywords": [],
+  "keywords": [
+    "renewable",
+    "energy",
+    "forecasting",
+    "AI",
+    "hackathon"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
