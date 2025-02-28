@@ -3,29 +3,31 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "workspaces": [
-    "Frontend",
-    "Backend"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:frontend": "cd Frontend && npm run dev",
-    "dev:backend": "cd Backend && npm run dev",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "build:frontend": "cd Frontend && npm run build",
-    "build:backend": "cd Backend && npm run build",
-    "build": "npm run build:frontend && npm run build:backend",
-    "start": "cd Backend && npm run start"
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hridesh-Srivastava/hackItOut.git"
   },
   "keywords": [
     "renewable",
     "energy",
     "forecasting",
     "AI",
-    "hackathon"
+    "MERN"
   ],
   "author": "",
   "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Hridesh-Srivastava/hackItOut/issues"
+  },
+  "homepage": "https://github.com/Hridesh-Srivastava/hackItOut#readme",
   "devDependencies": {
     "concurrently": "^9.1.2"
   }
