@@ -1,11 +1,11 @@
-// filepath: /C:/Users/USER/OneDrive/Desktop/hackItOut/hackathon/backend/src/routes/forecastRoutes.js
-import express from "express"
-import { generateForecast, getForecasts, updateActualValues } from "../controllers/forecastController.js"
-import { authenticate } from "../middleware/authMiddleware.js"
-const router = express.Router()
+import express from "express";
+import { generateForecast, getForecasts, updateActualValues } from "../controllers/forecastController.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 
-router.route("/generate").post(authenticate, generateForecast)
-router.route("/:location/:days").get(getForecasts)
-router.route("/:id/actual").put(authenticate, updateActualValues)
+const router = express.Router();
 
-export default router
+router.route("/generate").post(authenticate, generateForecast);
+router.route("/:location/:days").get(getForecasts);
+router.route("/:id/actual").put(authenticate, updateActualValues);
+
+export default router;

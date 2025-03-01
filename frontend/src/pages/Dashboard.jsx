@@ -15,11 +15,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true)
-        // In a real app, this would be an API call
-        // const response = await api.get('/dashboard')
-        // setDashboardData(response.data)
-
-        // Mock data for demonstration
+       
         setDashboardData({
           currentEnergy: {
             solar: 45.2,

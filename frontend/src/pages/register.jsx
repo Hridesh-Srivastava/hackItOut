@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FiUserPlus } from 'react-icons/fi';
+import { FiUserPlus } from "react-icons/fi";
+import { authAPI } from "../services/api";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -8,29 +11,30 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [organization, setOrganization] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/users/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, organization }),
-      });
+      console.log("Submitting registration form:", { name, email, password, organization });
+      const response = await authAPI.register({ name, email, password, organization });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data));
+      if (response.status === 201) {
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data));
         navigate("/");
       } else {
-        setError(data.message || "Registration failed");
+        setError(response.data.message || "Registration failed");
       }
     } catch (err) {
+      console.error("Registration error:", err);
       setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,17 +47,87 @@ const Register = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Form fields... */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
+                Organization (Optional)
+              </label>
+              <div className="mt-1">
+                <input
+                  id="organization"
+                  name="organization"
+                  type="text"
+                  autoComplete="organization"
+                  value={organization}
+                  onChange={(e) => setOrganization(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                />
+              </div>
+            </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
               >
                 <FiUserPlus className="h-5 w-5 mr-2" />
-                Register
+                {loading ? "Registering..." : "Register"}
               </button>
             </div>
           </form>
