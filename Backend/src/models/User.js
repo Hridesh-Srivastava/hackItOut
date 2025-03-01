@@ -1,4 +1,3 @@
-// filepath: /C:/Users/USER/OneDrive/Desktop/hackItOut/hackathon/backend/src/models/User.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 

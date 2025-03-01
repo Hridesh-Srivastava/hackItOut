@@ -1,9 +1,7 @@
 import asyncHandler from "express-async-handler";
 import axios from "axios";
 
-// @desc    Fetch current weather data
-// @route   GET /api/weather/current/:location
-// @access  Public
+
 const getCurrentWeather = asyncHandler(async (req, res) => {
   const { location } = req.params;
 
@@ -35,9 +33,6 @@ const getCurrentWeather = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Fetch weather forecast data
-// @route   GET /api/weather/forecast/:location/:days
-// @access  Public
 const getWeatherForecast = asyncHandler(async (req, res) => {
   const { location, days } = req.params;
 
@@ -53,9 +48,6 @@ const getWeatherForecast = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Fetch historical weather data
-// @route   GET /api/weather/historical/:location/:startDate/:endDate
-// @access  Public
 const getHistoricalWeather = asyncHandler(async (req, res) => {
   const { location, startDate, endDate } = req.params;
 
