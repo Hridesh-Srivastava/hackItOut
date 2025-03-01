@@ -21,7 +21,7 @@ const generateForecast = asyncHandler(async (req, res) => {
       throw new Error("Weather data not found for the specified location and date")
     }
 
-    // Check if forecast already exists
+    
     const existingForecast = await EnergyForecast.findOne({
       location,
       date: {
@@ -36,8 +36,7 @@ const generateForecast = asyncHandler(async (req, res) => {
 
    
 
-    
-    const solarEnergy = calculateSolarEnergy(weatherData)
+   const solarEnergy = calculateSolarEnergy(weatherData)
 
     
     const windEnergy = calculateWindEnergy(weatherData)
@@ -45,7 +44,7 @@ const generateForecast = asyncHandler(async (req, res) => {
     
     const totalEnergy = solarEnergy + windEnergy
 
-    // Create a new forecast
+    
     const energyForecast = new EnergyForecast({
       location: weatherData.location,
       date: weatherData.date,
