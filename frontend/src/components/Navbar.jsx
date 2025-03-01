@@ -1,98 +1,83 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FiMenu, FiSun, FiMoon, FiBell, FiUser } from "react-icons/fi";
 
-function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
-  
-  const navLinks = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Forecast', path: '/forecast' },
-    { name: 'Analytics', path: '/analytics' },
-    { name: 'Settings', path: '/settings' },
-  ];
+const Navbar = () => {
+  const navigate = useNavigate();
+  const [darkMode, setDarkMode] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("darkMode") === "true";
+    setDarkMode(savedTheme);
+    if (savedTheme) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem("darkMode", newMode);
+    document.documentElement.classList.toggle("dark", newMode);
+  };
+
+  const handleUserClick = () => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      alert("User is logged in");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleNotificationClick = () => {
+    setShowNotification(!showNotification);
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md">
+    <nav className="bg-white dark:bg-gray-800 shadow-sm relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-primary-600 dark:text-primary-400 font-bold text-xl">EnergyForecast</span>
-            </Link>
+            <button className="p-2 rounded-md text-gray-500 lg:hidden">
+              <FiMenu className="h-6 w-6" />
+            </button>
+            <div className="ml-4 text-xl font-bold text-primary-600 dark:text-primary-400">
+              EnergyForecast AI
+            </div>
           </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === link.path
-                    ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-          
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
+          <div className="flex items-center space-x-4">
             <button
-              onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+              onClick={toggleDarkMode}
+              className="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className={${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
+            </button>
+            <div className="relative">
+              <button 
+                onClick={handleNotificationClick}
+                className="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg
-                className={${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+                <FiBell className="h-5 w-5" />
+              </button>
+              {showNotification && (
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-700 rounded-md shadow-lg py-2 px-3 z-10 text-sm text-gray-700 dark:text-gray-300">
+                  No notifications available for now.
+                </div>
+              )}
+            </div>
+            <button
+              onClick={handleUserClick}
+              className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
+            >
+              <FiUser className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </button>
           </div>
         </div>
       </div>
-      
-      <div className={${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          {navLinks.map((link) => (
-            <Link
-              key = {link.name}
-              to = {link.path}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === link.path
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`} 
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-      </div>
     </nav>
   );
-}
+};
 
 export default Navbar;
