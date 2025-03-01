@@ -1,44 +1,37 @@
 import jwt from "jsonwebtoken"
-import asyncHandler from "express-async-handler"
-import User from "../models/userModel.js"
+import User from "../models/User.js"
 
+export const authenticate = async (req, res, next) => {
+  try {
+    let token
 
-const protect = asyncHandler(async (req, res, next) => {
-  let token
-
-  // Check if token exists in headers
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    try {
-      // Get token from header
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1]
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-      req.user = await User.findById(decoded.id).select("-password")
-
-      next()
-    } catch (error) {
-      console.error(error)
-      res.status(401)
-      throw new Error("Not authorized, token failed")
     }
-  }
 
-  if (!token) {
-    res.status(401)
-    throw new Error("Not authorized, no token")
-  }
-})
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized, no token" })
+    }
 
-// Middleware to check if user is admin
-const admin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    const user = await User.findById(decoded.id).select("-password")
+
+    if (!user || !user.active) {
+      return res.status(401).json({ message: "Not authorized, user not found or inactive" })
+    }
+
+    req.user = user
     next()
-  } else {
-    res.status(401)
-    throw new Error("Not authorized as an admin")
+  } catch (error) {
+    res.status(401).json({ message: "Not authorized, token failed", error: error.message })
   }
 }
 
-export { protect, admin }
-
+export const authorize = (role) => (req, res, next) => {
+  if (req.user && req.user.role === role) {
+    next()
+  } else {
+    res.status(403).json({ message: "Not authorized" })
+  }
+}
