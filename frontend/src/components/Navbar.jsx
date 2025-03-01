@@ -8,12 +8,20 @@ const Navbar = () => {
   const navigate = useNavigate()
   const [darkMode, setDarkMode] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
+    // Check for dark mode preference
     const savedTheme = localStorage.getItem("darkMode") === "true"
     setDarkMode(savedTheme)
     if (savedTheme) {
       document.documentElement.classList.add("dark")
+    }
+
+    // Check if user is logged in
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
     }
   }, [])
 
@@ -25,8 +33,16 @@ const Navbar = () => {
   }
 
   const handleUserClick = () => {
-    // Directly navigate to login page without checking localStorage
-    navigate("/login")
+    // If user is logged in, show profile or logout options
+    // Otherwise redirect to login page
+    if (user) {
+      // For now, just log out the user
+      localStorage.removeItem("user")
+      setUser(null)
+      navigate("/")
+    } else {
+      navigate("/login")
+    }
   }
 
   const handleNotificationClick = () => {
