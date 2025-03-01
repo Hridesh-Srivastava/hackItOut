@@ -1,138 +1,74 @@
-import asyncHandler from "express-async-handler"
-import axios from "axios"
-import WeatherData from "../models/weatherDataModel.js"
+import asyncHandler from "express-async-handler";
+import axios from "axios";
 
+// @desc    Fetch current weather data
+// @route   GET /api/weather/current/:location
+// @access  Public
 const getCurrentWeather = asyncHandler(async (req, res) => {
-  const { location } = req.params
+  const { location } = req.params;
 
-  try {
-    const recentData = await WeatherData.findOne({
-      location: location,
-      date: { $gte: new Date(Date.now() - 60 * 60 * 1000) },
+  const { data } = await axios.get(
+    `${process.env.WEATHER_API_URL}/current.json?key=${process.env.WEATHER_API_KEY}&q=${location}`
+  );
+
+  if (data) {
+    res.json({
+      location: data.location.name,
+      region: data.location.region,
+      country: data.location.country,
+      temp_c: data.current.temp_c,
+      temp_f: data.current.temp_f,
+      condition: data.current.condition.text,
+      icon: data.current.condition.icon,
+      wind_kph: data.current.wind_kph,
+      wind_mph: data.current.wind_mph,
+      humidity: data.current.humidity,
+      cloud: data.current.cloud,
+      feelslike_c: data.current.feelslike_c,
+      feelslike_f: data.current.feelslike_f,
+      uv: data.current.uv,
       source: "API",
-    }).sort({ date: -1 })
-
-    if (recentData) {
-      return res.json(recentData)
-    }
-
-    // If no recent data, fetch from external API
-    const response = await axios.get(`${process.env.WEATHER_API_URL}/current.json`, {
-      params: {
-        key: process.env.WEATHER_API_KEY,
-        q: location,
-      },
-    })
-
-    const { current, location: locationData } = response.data
-
-    // Transform the data to our model format
-    const weatherData = new WeatherData({
-      location: locationData.name,
-      date: new Date(),
-      temperature: current.temp_c,
-      windSpeed: current.wind_kph,
-      windDirection: current.wind_degree,
-      humidity: current.humidity,
-      cloudCover: current.cloud,
-      precipitation: current.precip_mm,
-      solarRadiation: current.uv * 10, 
-      source: "API",
-    })
-
-    // Save to DB
-    await weatherData.save()
-
-    res.json(weatherData)
-  } catch (error) {
-    console.error(`Error fetching weather data: ${error.message}`)
-    res.status(500)
-    throw new Error("Failed to fetch weather data")
+    });
+  } else {
+    res.status(404);
+    throw new Error("Weather data not found");
   }
-})
+});
 
-
+// @desc    Fetch weather forecast data
+// @route   GET /api/weather/forecast/:location/:days
+// @access  Public
 const getWeatherForecast = asyncHandler(async (req, res) => {
-  const { location, days } = req.params
-  const forecastDays = Number.parseInt(days) || 7
+  const { location, days } = req.params;
 
-  try {
-    
-    const response = await axios.get(`${process.env.WEATHER_API_URL}/forecast.json`, {
-      params: {
-        key: process.env.WEATHER_API_KEY,
-        q: location,
-        days: forecastDays,
-      },
-    })
+  const { data } = await axios.get(
+    `${process.env.WEATHER_API_URL}/forecast.json?key=${process.env.WEATHER_API_KEY}&q=${location}&days=${days}`
+  );
 
-    const { forecast, location: locationData } = response.data
-
-    // Transform and save each forecast day
-    const weatherDataPromises = forecast.forecastday.map(async (day) => {
-      const weatherData = new WeatherData({
-        location: locationData.name,
-        date: new Date(day.date),
-        temperature: day.day.avgtemp_c,
-        windSpeed: day.day.maxwind_kph,
-        windDirection: 0, 
-        humidity: day.day.avghumidity,
-        cloudCover: 0,
-        precipitation: day.day.totalprecip_mm,
-        solarRadiation: day.day.uv * 10, 
-        source: "API",
-      })
-
-      // Check if we already have this forecast day
-      const existingForecast = await WeatherData.findOne({
-        location: locationData.name,
-        date: {
-          $gte: new Date(day.date),
-          $lt: new Date(new Date(day.date).setDate(new Date(day.date).getDate() + 1)),
-        },
-        source: "API",
-      })
-
-      if (!existingForecast) {
-        await weatherData.save()
-      }
-
-      return weatherData
-    })
-
-    const weatherDataResults = await Promise.all(weatherDataPromises)
-    res.json(weatherDataResults)
-  } catch (error) {
-    console.error(`Error fetching weather forecast: ${error.message}`)
-    res.status(500)
-    throw new Error("Failed to fetch weather forecast")
+  if (data) {
+    res.json(data.forecast.forecastday);
+  } else {
+    res.status(404);
+    throw new Error("Weather forecast data not found");
   }
-})
+});
 
+// @desc    Fetch historical weather data
+// @route   GET /api/weather/historical/:location/:startDate/:endDate
+// @access  Public
 const getHistoricalWeather = asyncHandler(async (req, res) => {
-  const { location, startDate, endDate } = req.params
+  const { location, startDate, endDate } = req.params;
 
-  try {
-    const start = new Date(startDate)
-    const end = new Date(endDate)
+  const { data } = await axios.get(
+    `${process.env.WEATHER_API_URL}/history.json?key=${process.env.WEATHER_API_KEY}&q=${location}&dt=${startDate}&end_dt=${endDate}`
+  );
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      res.status(400)
-      throw new Error("Invalid date format. Use YYYY-MM-DD")
-    }
-// query db for historic data
-    const historicalData = await WeatherData.find({
-      location: location,
-      date: { $gte: start, $lte: end },
-    }).sort({ date: 1 })
-
-    res.json(historicalData)
-  } catch (error) {
-    console.error(`Error fetching historical weather: ${error.message}`)
-    res.status(500)
-    throw new Error("Failed to fetch historical weather data")
+  if (data) {
+    res.json(data.forecast.forecastday);
+  } else {
+    res.status(404);
+    throw new Error("Historical weather data not found");
   }
-})
+});
 
-export { getCurrentWeather, getWeatherForecast, getHistoricalWeather }
-
+export { getCurrentWeather, getWeatherForecast, getHistoricalWeather };
